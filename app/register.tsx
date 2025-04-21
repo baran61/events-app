@@ -11,24 +11,38 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { globalStyles as styles } from './styles/globalStyles';
+import { API_BASE_URL } from '../constants/api';
 
 export default function RegisterScreen() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
-
+  
   const handleRegister = async () => {
+
     if (!username || !password) {
       Alert.alert('Eksik Alan', 'Lütfen kullanıcı adı ve şifreyi girin.');
       return;
     }
-
+  
     try {
-      await AsyncStorage.setItem('registeredUser', JSON.stringify({ username, password }));
+      const res = await fetch(`${API_BASE_URL}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+  
+      const data = await res.json();
+  
+      if (!res.ok) {
+        Alert.alert('Hata', data.message || 'Kayıt başarısız.');
+        return;
+      }
+  
       Alert.alert('Kayıt Başarılı', 'Giriş yapabilirsiniz.');
       router.replace('/login');
     } catch (e) {
-      Alert.alert('Hata', 'Kayıt sırasında bir sorun oluştu.');
+      Alert.alert('Hata', 'Sunucuya bağlanılamadı.');
     }
   };
 

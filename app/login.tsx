@@ -11,7 +11,8 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { globalStyles as styles } from "./styles/globalStyles";
-
+import { API_BASE_URL } from '../constants/api';
+ 
 const validRefs = ["ABC123", "XYZ789"];
 
 export default function LoginScreen() {
@@ -19,38 +20,39 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const [refCode, setRefCode] = useState("");
   const router = useRouter();
+ 
+
 
   const handleLogin = async () => {
     if (!username || !password || !refCode) {
-      Alert.alert("Eksik Alan", "Lütfen tüm alanları doldurun.");
+      Alert.alert('Eksik Alan', 'Lütfen tüm alanları doldurun.');
       return;
     }
-
+  
     try {
-      const storedUser = await AsyncStorage.getItem("registeredUser");
-      const parsedUser = storedUser ? JSON.parse(storedUser) : null;
-
-      if (
-        !parsedUser ||
-        parsedUser.username !== username ||
-        parsedUser.password !== password
-      ) {
-        Alert.alert("Hatalı Giriş", "Kullanıcı adı veya şifre yanlış.");
+      const res = await fetch(`${API_BASE_URL}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+  
+      const data = await res.json();
+  
+      if (!res.ok) {
+        Alert.alert('Giriş Hatalı', data.message || 'Giriş yapılamadı.');
         return;
       }
-
+  
       if (!validRefs.includes(refCode)) {
-        Alert.alert(
-          "Geçersiz Referans",
-          "Lütfen geçerli bir referans kodu girin."
-        );
+        Alert.alert('Geçersiz Referans', 'Referans kodu hatalı.');
         return;
       }
-
-      await AsyncStorage.setItem("username", username);
-      router.replace("/(tabs)");
+  
+      await AsyncStorage.setItem('username', username);
+      // await AsyncStorage.setItem('token', data.token); ← ileride JWT ile
+      router.replace('/(tabs)');
     } catch (e) {
-      Alert.alert("Hata", "Giriş sırasında bir hata oluştu.");
+      Alert.alert('Hata', 'Sunucuya bağlanılamadı.');
     }
   };
 
