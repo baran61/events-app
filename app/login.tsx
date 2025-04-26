@@ -24,13 +24,13 @@ export default function LoginScreen() {
 
 
   const handleLogin = async () => {
-    if (!username || !password || !refCode) {
-      Alert.alert('Eksik Alan', 'Lütfen tüm alanları doldurun.');
+    if (!username || !password) {
+      Alert.alert('Eksik Alan', 'Lütfen kullanıcı adı ve şifreyi doldurun.');
       return;
     }
   
     try {
-      const res = await fetch(`${API_BASE_URL}/login`, {
+      const res = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
@@ -43,16 +43,23 @@ export default function LoginScreen() {
         return;
       }
   
-      if (!validRefs.includes(refCode)) {
-        Alert.alert('Geçersiz Referans', 'Referans kodu hatalı.');
-        return;
-      }
-  
+      // ✅ token kaydet
+      await AsyncStorage.setItem('token', data.token);
       await AsyncStorage.setItem('username', username);
-      // await AsyncStorage.setItem('token', data.token); ← ileride JWT ile
+  
+      // ✅ isAdmin bilgisini ayrıca kaydet
+      const tokenParts = data.token.split('.');
+      const base64 = tokenParts[1].replace(/-/g, '+').replace(/_/g, '/');
+      const payload = JSON.parse(atob(base64));
+  
+      console.log('LOGIN PAYLOAD:', payload);
+  
+      await AsyncStorage.setItem('isAdmin', JSON.stringify(payload.isAdmin)); // 🌟 kritik kısım
+  
       router.replace('/(tabs)');
     } catch (e) {
       Alert.alert('Hata', 'Sunucuya bağlanılamadı.');
+      console.error('Login error:', e);
     }
   };
 

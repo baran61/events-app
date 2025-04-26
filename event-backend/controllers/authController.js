@@ -1,36 +1,58 @@
-const User = require('../models/User');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const User = require("../models/User");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 exports.register = async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, isAdmin } = req.body;
   try {
     const existing = await User.findOne({ username });
-    if (existing) return res.status(400).json({ message: 'Kullanıcı zaten var' });
+    if (existing)
+      return res.status(400).json({ message: "Kullanıcı zaten var" });
 
     const hashed = await bcrypt.hash(password, 10);
-    const user = new User({ username, password: hashed });
+
+    const user = new User({ 
+      username, 
+      password: hashed, 
+      isAdmin: isAdmin || false // 🔥 gelen isAdmin varsa onu al, yoksa false
+    });
+
     await user.save();
 
-    res.status(201).json({ message: 'Kayıt başarılı' });
+    res.status(201).json({ message: "Kayıt başarılı" });
   } catch (err) {
-    res.status(500).json({ message: 'Sunucu hatası' });
+    res.status(500).json({ message: "Sunucu hatası" });
   }
 };
 
 exports.login = async (req, res) => {
   const { username, password } = req.body;
+
   try {
     const user = await User.findOne({ username });
-    if (!user) return res.status(400).json({ message: 'Kullanıcı bulunamadı' });
 
-    const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.status(400).json({ message: 'Şifre hatalı' });
+    if (!user) {
+      return res.status(400).json({ message: "Kullanıcı bulunamadı" });
+    }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '2h' });
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Şifre yanlış" });
+    }
 
-    res.status(200).json({ message: 'Giriş başarılı', token });
-  } catch (err) {
-    res.status(500).json({ message: 'Sunucu hatası' });
+    // JWT Token oluşturma
+    const token = jwt.sign(
+      {
+        id: user._id,
+        username: user.username,
+        isAdmin: user.isAdmin,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.status(200).json({ token });
+  } catch (error) {
+    res.status(500).json({ message: "Sunucu hatası" });
   }
 };
