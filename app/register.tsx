@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { globalStyles as styles } from './styles/globalStyles';
+import { globalStyles as styles } from '../styles/globalStyles';
 import { API_BASE_URL } from '../constants/api';
 
 export default function RegisterScreen() {

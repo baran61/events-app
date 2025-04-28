@@ -3,7 +3,9 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const authRoutes = require('./routes/auth');
-const eventRoutes = require('./routes/event');
+const adminRoutes = require('./routes/admin');
+const eventsRoutes = require('./routes/events');
+const upcomingRoutes = require('./routes/upcoming');
 
 dotenv.config();
 
@@ -17,8 +19,15 @@ app.use(cors({
 
 app.use(express.json());
 
+// Kullanıcı işlemleri
+app.use('/api/events', eventsRoutes);    // Etkinlikleri GÖRMEK için
+app.use('/api/upcoming', upcomingRoutes); // Yaklaşan etkinlikleri GÖRMEK için
+
+// Admin işlemleri
+app.use('/api/admin', adminRoutes); // Sadece admin için yönetim işlemleri
+
+// Kullanıcı auth işlemleri
 app.use('/api/auth', authRoutes);
-app.use('/api/events', eventRoutes);
 
 
 mongoose.connect(process.env.MONGO_URI)

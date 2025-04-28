@@ -10,7 +10,7 @@ import {
   Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { globalStyles as styles } from "./styles/globalStyles";
+import { globalStyles as styles } from "../styles/globalStyles";
 import { API_BASE_URL } from '../constants/api';
  
 const validRefs = ["ABC123", "XYZ789"];

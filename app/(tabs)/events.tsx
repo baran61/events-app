@@ -1,79 +1,65 @@
-import { FlatList, View, Text, StyleSheet, Image, Pressable } from 'react-native';
-
-const events = [
-  {
-    id: '1',
-    title: 'React Native Workshop',
-    date: '2025-05-01',
-    location: 'Online',
-    image: 'https://reactnative.dev/img/header_logo.svg',
-  },
-  {
-    id: '2',
-    title: 'Tech Meetup Ankara',
-    date: '2025-05-10',
-    location: 'Ankara, Türkiye',
-    image: 'https://picsum.photos/300/200',
-  },
-  {
-    id: '3',
-    title: 'Startup Talk',
-    date: '2025-06-01',
-    location: 'İstanbul, Türkiye',
-    image: 'https://picsum.photos/300/201',
-  },
-];
+import { useEffect, useState } from 'react';
+import { useRouter } from 'expo-router';
+import { FlatList, View, Text, Image, Pressable, ActivityIndicator, SafeAreaView } from 'react-native';
+import { API_BASE_URL } from '../../constants/api';
+import { globalStyles as styles } from '../../styles/globalStyles'; // Global stilleri kullanıyoruz
 
 export default function EventsScreen() {
-  const renderItem = ({ item }: { item: typeof events[0] }) => (
-    <Pressable style={styles.card}>
-      <Image source={{ uri: item.image }} style={styles.image} />
-      <View style={styles.info}>
-        <Text style={styles.title}>{item.title}</Text>
-        <Text style={styles.details}>{item.date} | {item.location}</Text>
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  const fetchEvents = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/events`);
+      const data = await res.json();
+      setEvents(data);
+    } catch (error) {
+      console.error('Etkinlikler çekilemedi:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderItem = ({ item }: { item: any }) => (
+    <Pressable
+      style={styles.card}
+      onPress={() => router.push({ pathname: '/eventDetail', params: { id: item._id, title: item.title, description: item.description, image: item.image, date: item.date } })}
+    >
+      {item.image && (
+        <Image
+          source={{ uri: item.image }}
+          style={styles.cardImage}
+          resizeMode="cover"
+        />
+      )}
+      <View style={styles.cardInfo}>
+        <Text style={styles.subtitle}>{item.title}</Text>
+        <Text style={styles.text}>{new Date(item.date).toLocaleDateString('tr-TR')}</Text>
       </View>
     </Pressable>
   );
 
+  if (loading) {
+    return (
+      <View style={styles.centerContainer}> 
+        <ActivityIndicator size="large" color="#4b7bec" />
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <FlatList
         data={events}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingBottom: 24 }}
+        keyExtractor={(item) => item._id}
+        contentContainerStyle={{ paddingBottom: 100 }}
       />
-    </View>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 16,
-    backgroundColor: '#fff',
-    flex: 1,
-  },
-  card: {
-    backgroundColor: '#f2f2f2',
-    borderRadius: 12,
-    marginBottom: 16,
-    overflow: 'hidden',
-    elevation: 2,
-  },
-  image: {
-    width: '100%',
-    height: 160,
-  },
-  info: {
-    padding: 12,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  details: {
-    fontSize: 14,
-    color: '#555',
-    marginTop: 4,
-  },
-});

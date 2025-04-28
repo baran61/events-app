@@ -36,3 +36,23 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
+
+# Custom utils that contain secrets
+utils/cloudinaryUpload.js
+
+# IDE config folders
+.idea/
+.vscode/
+
+# Build outputs
+build/
+.expo-shared/
+
+# Other local environment files
+.env
+.env.production
+.env.development
+.env.test
+
+# Backend içindeki .env dosyasını ignore et
+event-backend/.env
