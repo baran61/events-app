@@ -14,11 +14,11 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Picker } from "@react-native-picker/picker";
-import { API_BASE_URL } from "../../constants/api";
-import { globalStyles as styles } from "../../styles/globalStyles";
+import { API_BASE_URL } from "../constants/api";
+import { globalStyles as styles } from "../styles/globalStyles";
 import * as ImagePicker from "expo-image-picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { uploadImageToCloudinary } from "../../utils/cloudinaryUpload";
+import { uploadImageToCloudinary } from "../utils/cloudinaryUpload";
 
 export default function AdminScreen() {
   const router = useRouter();

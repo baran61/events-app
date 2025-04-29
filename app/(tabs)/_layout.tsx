@@ -1,38 +1,47 @@
-import { Tabs } from "expo-router";
-import { useEffect, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Platform } from "react-native";
-import { HapticTab } from "@/components/HapticTab";
-import { IconSymbol } from "@/components/ui/IconSymbol";
-import TabBarBackground from "@/components/ui/TabBarBackground";
-import { Colors } from "@/constants/Colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
+// app/(tabs)/_layout.tsx
+import { Tabs } from 'expo-router';
+import { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
+import { HapticTab } from '@/components/HapticTab';
+import { IconSymbol } from '@/components/ui/IconSymbol';
+import TabBarBackground from '@/components/ui/TabBarBackground';
+import { Colors } from '@/constants/Colors';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkAdmin = async () => {
-      const isAdminStorage = await AsyncStorage.getItem('isAdmin');
-      setIsAdmin(isAdminStorage === 'true'); // String 'true' ise admin kabul
+    const checkIsAdmin = async () => {
+      try {
+        const adminFlag = await AsyncStorage.getItem('isAdmin');
+        setIsAdmin(adminFlag === 'true');
+      } catch (error) {
+        console.error('Admin kontrol hatası:', error);
+      } finally {
+        setLoading(false);
+      }
     };
-    checkAdmin();
+
+    checkIsAdmin();
   }, []);
 
-  if (isAdmin === null) {
-    return null; // Admin bilgisi gelmeden Tabs oluşturma (boş ekran)
+  if (loading) {
+    return null; // veya bir <Loading /> gösterebilirsin
   }
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
         tabBarStyle: Platform.select({
-          ios: { position: "absolute" },
+          ios: { position: 'absolute' },
           default: {},
         }),
       }}
@@ -40,7 +49,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Home",
+          title: 'Home',
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="house.fill" color={color} />
           ),
@@ -50,7 +59,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="events"
         options={{
-          title: "Events",
+          title: 'Events',
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="calendar" color={color} />
           ),
@@ -61,7 +70,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="admin"
           options={{
-            title: "Admin",
+            title: 'Admin',
             tabBarIcon: ({ color }) => (
               <IconSymbol size={28} name="gearshape.fill" color={color} />
             ),

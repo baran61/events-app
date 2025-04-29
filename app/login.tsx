@@ -59,10 +59,13 @@ export default function LoginScreen() {
       console.log('LOGIN PAYLOAD:', decodedPayload);
 
       const isAdminFromToken = decodedPayload.isAdmin === true;
-
       await AsyncStorage.setItem('isAdmin', JSON.stringify(isAdminFromToken));
 
-      router.replace('/(tabs)');
+      if (isAdminFromToken) {
+        router.replace('/(admin)/dashboard');
+      } else {
+        router.replace('/(tabs)');
+      }
 
     } catch (e) {
       Alert.alert('Hata', 'Sunucuya bağlanılamadı.');
