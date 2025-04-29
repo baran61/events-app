@@ -22,7 +22,7 @@ import { uploadImageToCloudinary } from "../../utils/cloudinaryUpload";
 
 export default function AdminScreen() {
   const router = useRouter();
-  const [events, setEvents] = useState([]);
+  const [events, setEvents] = useState([]); 
   const [newTitle, setNewTitle] = useState("");
   const [newDescription, setNewDescription] = useState("");
   const [newImage, setNewImage] = useState("");

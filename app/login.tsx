@@ -22,41 +22,48 @@ export default function LoginScreen() {
   const router = useRouter();
  
 
-
   const handleLogin = async () => {
-    if (!username || !password) {
-      Alert.alert('Eksik Alan', 'Lütfen kullanıcı adı ve şifreyi doldurun.');
+    if (!username || !password || !refCode) {
+      Alert.alert('Eksik Alan', 'Tüm alanları doldurun.');
       return;
     }
-  
+
+    // Referans kodu sadece ek bir frontend kontrolü, gerçek adminlik token'dan alınacak
+    if (!validRefs.includes(refCode)) {
+      Alert.alert('Geçersiz Referans', 'Referans kodu hatalı.');
+      return;
+    }
+
     try {
       const res = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
       });
-  
+
       const data = await res.json();
-  
+
       if (!res.ok) {
         Alert.alert('Giriş Hatalı', data.message || 'Giriş yapılamadı.');
         return;
       }
-  
-      // ✅ token kaydet
+
       await AsyncStorage.setItem('token', data.token);
       await AsyncStorage.setItem('username', username);
-  
-      // ✅ isAdmin bilgisini ayrıca kaydet
+
+      // Token'ı decode et
       const tokenParts = data.token.split('.');
       const base64 = tokenParts[1].replace(/-/g, '+').replace(/_/g, '/');
-      const payload = JSON.parse(atob(base64));
-  
-      console.log('LOGIN PAYLOAD:', payload);
-  
-      await AsyncStorage.setItem('isAdmin', JSON.stringify(payload.isAdmin)); // 🌟 kritik kısım
-  
+      const decodedPayload = JSON.parse(atob(base64));
+
+      console.log('LOGIN PAYLOAD:', decodedPayload);
+
+      const isAdminFromToken = decodedPayload.isAdmin === true;
+
+      await AsyncStorage.setItem('isAdmin', JSON.stringify(isAdminFromToken));
+
       router.replace('/(tabs)');
+
     } catch (e) {
       Alert.alert('Hata', 'Sunucuya bağlanılamadı.');
       console.error('Login error:', e);

@@ -3,25 +3,22 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 exports.register = async (req, res) => {
-  const { username, password, isAdmin } = req.body;
+  const { username, password } = req.body;
+
   try {
     const existing = await User.findOne({ username });
-    if (existing)
-      return res.status(400).json({ message: "Kullanıcı zaten var" });
+    if (existing) return res.status(400).json({ message: 'Kullanıcı zaten var' });
 
     const hashed = await bcrypt.hash(password, 10);
 
-    const user = new User({ 
-      username, 
-      password: hashed, 
-      isAdmin: isAdmin || false // 🔥 gelen isAdmin varsa onu al, yoksa false
-    });
+    // 🔐 isAdmin burada asla dışarıdan gelmiyor, default false olacak
+    const user = new User({ username, password: hashed });
 
     await user.save();
 
-    res.status(201).json({ message: "Kayıt başarılı" });
+    res.status(201).json({ message: 'Kayıt başarılı' });
   } catch (err) {
-    res.status(500).json({ message: "Sunucu hatası" });
+    res.status(500).json({ message: 'Sunucu hatası' });
   }
 };
 
