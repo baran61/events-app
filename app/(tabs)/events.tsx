@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
-import { FlatList, View, Text, Image, Pressable, ActivityIndicator, SafeAreaView } from 'react-native';
+import { FlatList, View, Text, Image, Pressable, SafeAreaView } from 'react-native';
 import { API_BASE_URL } from '../../constants/api';
 import { globalStyles as styles } from '../../styles/globalStyles'; // Global stilleri kullanıyoruz
+import { ActivityIndicator } from 'react-native';
 
 export default function EventsScreen() {
   const [events, setEvents] = useState<any[]>([]);
@@ -15,6 +16,7 @@ export default function EventsScreen() {
 
   const fetchEvents = async () => {
     try {
+      setLoading(true);
       const res = await fetch(`${API_BASE_URL}/events`);
       const data = await res.json();
       setEvents(data);
@@ -46,8 +48,9 @@ export default function EventsScreen() {
 
   if (loading) {
     return (
-      <View style={styles.centerContainer}> 
-        <ActivityIndicator size="large" color="#4b7bec" />
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color="#c084fc" />
+        <Text style={{ color: '#fff', marginTop: 10 }}>Yükleniyor...</Text>
       </View>
     );
   }
@@ -58,7 +61,7 @@ export default function EventsScreen() {
         data={events}
         renderItem={renderItem}
         keyExtractor={(item) => item._id}
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={{ paddingBottom: 100, paddingTop: 16 }}
       />
     </SafeAreaView>
   );

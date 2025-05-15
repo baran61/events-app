@@ -1,16 +1,29 @@
-import { useEffect } from 'react';
-import { useRouter, useNavigationContainerRef } from 'expo-router';
-import { useRootNavigationState } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'expo-router';
+import { View, Text, ActivityIndicator } from 'react-native';
 
 export default function Index() {
   const router = useRouter();
-  const rootNavigationState = useRootNavigationState();
+  const [navigationReady, setNavigationReady] = useState(false);
 
   useEffect(() => {
-    if (!rootNavigationState?.key) return; // Layout henüz hazır değil
+    const timer = setTimeout(() => {
+      setNavigationReady(true);
+    }, 100);
 
-    router.replace('/login'); // Layout yüklendiyse yönlendir
-  }, [rootNavigationState]);
+    return () => clearTimeout(timer);
+  }, []);
 
-  return null;
+  useEffect(() => {
+    if (navigationReady) {
+      router.replace('/login');
+    }
+  }, [navigationReady]);
+
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <ActivityIndicator />
+      <Text>Yönlendiriliyor...</Text>
+    </View>
+  );
 }

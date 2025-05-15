@@ -28,6 +28,16 @@ export default function LoginScreen() {
       return;
     }
 
+    if (username.length < 3) {
+      Alert.alert('Kullanıcı Adı Hatası', 'Kullanıcı adı en az 3 karakter olmalıdır.');
+      return;
+    }
+
+    if (password.length < 3) {
+      Alert.alert('Şifre Hatası', 'Şifre en az 6 karakter olmalıdır.');
+      return;
+    }
+
     // Referans kodu sadece ek bir frontend kontrolü, gerçek adminlik token'dan alınacak
     if (!validRefs.includes(refCode)) {
       Alert.alert('Geçersiz Referans', 'Referans kodu hatalı.');
@@ -75,7 +85,7 @@ export default function LoginScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={[styles.container, { justifyContent: "center" }]}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <Text style={styles.title}>Etkinlik Giriş</Text>

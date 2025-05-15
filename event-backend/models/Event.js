@@ -10,13 +10,13 @@ const EventSchema = new mongoose.Schema({
     required: true,
   },
   image: {
-    type: String, // 🔥 Resim URL'si
-    required: false, // Resim opsiyonel
+    type: String, 
+    required: false, 
   },
   date: {
-    type: Date, // 🔥 Tarih bilgisi
+    type: Date, 
     required: true,
   },
-}, { timestamps: true }); // createdAt, updatedAt otomatik eklenir
+}, { timestamps: true }); 
 
 module.exports = mongoose.model('Event', EventSchema);

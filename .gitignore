@@ -56,3 +56,4 @@ build/
 
 # Backend içindeki .env dosyasını ignore et
 event-backend/.env
+event-backend/routes/payment.js
