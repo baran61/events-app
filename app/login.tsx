@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   View,
@@ -9,7 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { globalStyles as styles } from "../styles/globalStyles";
 import { API_BASE_URL } from '../constants/api';
  
@@ -20,6 +20,15 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const [refCode, setRefCode] = useState("");
   const router = useRouter();
+  const { verified } = useLocalSearchParams();
+
+  useEffect(() => {
+    if (verified === 'true') {
+      Alert.alert('Başarılı', 'E-posta adresiniz doğrulandı.');
+    } else if (verified === 'already') {
+      Alert.alert('Bilgilendirme', 'E-posta adresiniz zaten doğrulanmış.');
+    }
+  }, [verified]);
  
 
   const handleLogin = async () => {
@@ -58,13 +67,20 @@ export default function LoginScreen() {
         return;
       }
 
-      await AsyncStorage.setItem('token', data.token);
-      await AsyncStorage.setItem('username', username);
+      const { token, isVerified } = data;
 
       // Token'ı decode et
-      const tokenParts = data.token.split('.');
+      const tokenParts = token.split('.');
       const base64 = tokenParts[1].replace(/-/g, '+').replace(/_/g, '/');
       const decodedPayload = JSON.parse(atob(base64));
+
+      if (!data.isVerified && !decodedPayload.isAdmin) {
+        Alert.alert('E-posta Doğrulama Gerekli', 'Lütfen önce e-posta adresinizi doğrulayın.');
+        return;
+      }
+
+      await AsyncStorage.setItem('token', token);
+      await AsyncStorage.setItem('username', username);
 
       console.log('LOGIN PAYLOAD:', decodedPayload);
 

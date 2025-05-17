@@ -98,7 +98,7 @@ export default function AdminScreen() {
           title: newTitle,
           description: newDescription,
           image: uploadedImageUrl,
-          date: newDate,
+          date: newDate.toISOString(),
         }),
       });
 
@@ -107,6 +107,7 @@ export default function AdminScreen() {
       setNewTitle("");
       setNewDescription("");
       setNewImage("");
+      setNewDate(new Date());
       fetchEvents();
     } catch (error) {
       console.error(error);
@@ -131,7 +132,6 @@ export default function AdminScreen() {
     }
   };
 
-  // Etkinlik güncelleme fonksiyonu
   const updateEvent = async () => {
     if (!editTitle || !editDescription) {
       Alert.alert("Eksik Bilgi", "Başlık ve açıklama giriniz.");
@@ -161,6 +161,7 @@ export default function AdminScreen() {
       setEditTitle("");
       setEditDescription("");
       setEditImage("");
+      setEditDate(new Date());
       fetchEvents();
     } catch (error) {
       console.error("Etkinlik güncellenemedi:", error);
@@ -175,6 +176,7 @@ export default function AdminScreen() {
     if (event.date) {
       setEditDate(new Date(event.date));
     }
+    setShowEditDatePicker(false);
   };
 
   const onChangeAddDate = (event: any, selectedDate?: Date) => {
@@ -209,11 +211,12 @@ export default function AdminScreen() {
     <View>
       <Text style={[styles.title, { marginTop: 40 }]}>Admin Paneli</Text>
 
-      {/* Etkinlik Türü Seçimi */}
       <Text style={styles.subtitle}>Etkinlik Türü</Text>
 
       {Platform.OS === "web" ? (
         <select
+          name="eventType"
+          id="eventType"
           style={{
             height: 50,
             marginBottom: 20,
@@ -278,22 +281,29 @@ export default function AdminScreen() {
         </>
       )}
 
-      {/* Yeni Etkinlik Girişi */}
-      <TextInput
-        style={[styles.input, { marginBottom: 20 }]}
-        placeholder="Yeni Etkinlik Başlığı"
-        placeholderTextColor="#888"
-        value={newTitle}
-        onChangeText={setNewTitle}
-      />
-      <TextInput
-        style={[styles.input, { marginBottom: 20 }]}
-        placeholder="Yeni Etkinlik Açıklaması"
-        placeholderTextColor="#888"
-        value={newDescription}
-        onChangeText={setNewDescription}
-      />
-      <Button title="📸 Fotoğraf Seç" onPress={pickImage} />
+      <View>
+        <TextInput
+          nativeID="newTitle"
+          style={[styles.input, { marginBottom: 20 }]}
+          placeholder="Yeni Etkinlik Başlığı"
+          placeholderTextColor="#888"
+          value={newTitle}
+          onChangeText={setNewTitle}
+          multiline
+        />
+      </View>
+      <View>
+        <TextInput
+          nativeID="newDescription"
+          style={[styles.input, { marginBottom: 20 }]}
+          placeholder="Yeni Etkinlik Açıklaması"
+          placeholderTextColor="#888"
+          value={newDescription}
+          onChangeText={setNewDescription}
+          multiline
+        />
+      </View>
+      <Button title="📸  Fotoğraf Seç" onPress={pickImage} />
 
       {newImage && (
         <Image
@@ -312,16 +322,18 @@ export default function AdminScreen() {
         />
       )}
 
-      <Text
-        style={{
-          marginTop: 10,
-          color: "#fff",
-          textAlign: "center",
-          fontSize: 16,
-        }}
-      >
-        Seçilen Tarih: {newDate.toLocaleDateString()}
-      </Text>
+      <View>
+        <Text
+          style={{
+            marginTop: 10,
+            color: "#fff",
+            textAlign: "center",
+            fontSize: 16,
+          }}
+        >
+          Seçilen Tarih: {newDate.toLocaleDateString()}
+        </Text>
+      </View>
 
       <Button title="➕ Etkinlik Ekle" onPress={addEvent} />
     </View>
@@ -330,6 +342,7 @@ export default function AdminScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#000" }}>
       <FlatList
+        keyboardShouldPersistTaps="handled"
         ListHeaderComponent={renderHeader}
         data={events}
         keyExtractor={(item: any) => item._id}
@@ -396,20 +409,27 @@ export default function AdminScreen() {
           }}
         >
           <Text style={styles.subtitle}>Etkinliği Düzenle</Text>
-          <TextInput
-            style={[styles.input, { color: "#ffffff" }]}
-            placeholder="Başlık"
-            placeholderTextColor="#888"
-            value={editTitle}
-            onChangeText={setEditTitle}
-          />
-          <TextInput
-            style={[styles.input, { color: "#ffffff" }]}
-            placeholder="Açıklama"
-            placeholderTextColor="#888"
-            value={editDescription}
-            onChangeText={setEditDescription}
-          />
+          <View>
+            <TextInput
+              nativeID="editTitle"
+              style={[styles.input, { color: "#ffffff" }]}
+              placeholder="Başlık"
+              placeholderTextColor="#888"
+              value={editTitle}
+              onChangeText={setEditTitle}
+            />
+          </View>
+          <View>
+            <TextInput
+              nativeID="editDescription"
+              style={[styles.input, { color: "#ffffff" }]}
+              placeholder="Açıklama"
+              placeholderTextColor="#888"
+              value={editDescription}
+              onChangeText={setEditDescription}
+              multiline
+            />
+          </View>
           <Button title="📸 Yeni Resim Seç" onPress={pickEditImage} />
           {editImage && (
             <Image

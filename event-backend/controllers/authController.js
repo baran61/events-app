@@ -3,24 +3,37 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
+const { sendVerificationEmail } = require("../utils/sendVerificationEmail");
 
 exports.register = async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, email } = req.body;
 
   try {
     const existing = await User.findOne({ username });
-    if (existing) return res.status(400).json({ message: 'Kullanıcı zaten var' });
+    if (existing)
+      return res.status(400).json({ message: "Kullanıcı zaten var" });
 
     const hashed = await bcrypt.hash(password, 10);
+    const token = crypto.randomBytes(32).toString("hex");
 
-    // 🔐 isAdmin burada asla dışarıdan gelmiyor, default false olacak
-    const user = new User({ username, password: hashed });
+    const user = new User({
+      username,
+      password: hashed,
+      email,
+      emailToken: token,
+      isVerified: false,
+    });
 
     await user.save();
 
-    res.status(201).json({ message: 'Kayıt başarılı' });
+    await sendVerificationEmail(email, token);
+
+    res
+      .status(201)
+      .json({ message: "Kayıt başarılı, e-posta doğrulama gönderildi." });
   } catch (err) {
-    res.status(500).json({ message: 'Sunucu hatası' });
+    console.error("Register error:", err);
+    res.status(500).json({ message: "Sunucu hatası" });
   }
 };
 
@@ -50,7 +63,9 @@ exports.login = async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    res.status(200).json({ token });
+    // Kullanıcının isVerified bilgisini de response ile gönder
+    res.status(200).json({ token, isVerified: user.isVerified });
+
   } catch (error) {
     res.status(500).json({ message: "Sunucu hatası" });
   }
@@ -68,7 +83,7 @@ exports.sendVerificationEmail = async (req, res) => {
     user.isVerified = false;
     await user.save();
 
-    const url = `http://localhost:5050/api/auth/verify-email?token=${token}`;
+    const url = `exp://192.168.1.148:8081/--/verify-email?token=${token}`;
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -102,7 +117,7 @@ exports.verifyEmail = async (req, res) => {
     user.isVerified = true;
     await user.save();
 
-    res.redirect("exp://localhost:8081/--/login?verified=true"); // Expo dev client URL veya mobil login ekranı 
+    res.redirect("exp://192.168.1.148:8081/--/login?verified=true");
   } catch (err) {
     res.status(500).send("Sunucu hatası");
   }

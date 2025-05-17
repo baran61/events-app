@@ -67,15 +67,7 @@ export default function RegisterScreen() {
         return;
       }
 
-      // E-posta doğrulama maili gönder
-      await fetch(`${API_BASE_URL}/auth/send-verification-email`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-
-      Alert.alert("Doğrulama E-postası Gönderildi", "Lütfen e-posta adresinizi kontrol edin.");
-      Alert.alert("Kayıt Başarılı", "Giriş yapabilirsiniz.");
+      Alert.alert("Kayıt Başarılı", "Lütfen e-posta adresinizi kontrol edin.");
       router.replace("/login");
     } catch (e) {
       Alert.alert("Hata", "Sunucuya bağlanılamadı.");
